@@ -1,77 +1,29 @@
-#![recursion_limit = "256"]
-
+mod codegen;
+mod effects;
 mod lexing;
-use lexing::*;
-
 mod parsing;
-pub use parsing::*;
+mod types;
 
-pub fn tokenize(input: &str) -> Vec<Token<'_>> {
-    let mut tokenizer = Tokenizer::asura();
+use crate::codegen::wasm::WasmCompiler;
+use crate::lexing::token::Token;
+use crate::parsing::ast::Program;
+use crate::types::TypeEnv;
+use logos::Logos;
 
-    tokenizer.init(input);
-    tokenizer.collect()
+pub fn compile(source: &str) -> Result<Vec<u8>, String> {
+    let tokens = Token::lexer(source).collect::<Vec<_>>();
+    let ast = parse_tokens(tokens)?;
+    let type_env = type_check(&ast)?;
+    let wasm = WasmCompiler::new().compile(&ast);
+    Ok(wasm)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::{error::Error, fs::read_to_string};
+fn parse_tokens(tokens: Vec<Token>) -> Result<Program, String> {
+    // Implement parser
+    unimplemented!("Parser not yet implemented")
+}
 
-    #[test]
-    fn it_tokenizes_whitespace() {
-        let input = "     ";
-        let result = tokenize(input);
-
-        let exepected = vec![Token::whitespace(input, Position::new(0, 5))];
-
-        assert_eq!(result.len(), 1);
-        assert_eq!(result, exepected);
-    }
-
-    #[test]
-    fn it_tokenizes_fib_example() -> Result<(), Box<dyn Error>> {
-        let contents: String = read_to_string("examples/fib.asura")?;
-
-        let result = tokenize(&contents);
-
-        print_vector(result);
-
-        Ok(())
-    }
-
-    #[test]
-    fn it_tokenizes_state_example() -> Result<(), Box<dyn Error>> {
-        let contents: String = read_to_string("examples/state.asura")?;
-
-        let result = tokenize(&contents);
-
-        print_vector(result);
-
-        Ok(())
-    }
-
-    #[test]
-    fn it_tokenizes_queue_example() -> Result<(), Box<dyn Error>> {
-        let contents: String = read_to_string("examples/queue.asura")?;
-
-        let result = tokenize(&contents);
-
-        print_vector(result);
-
-        Ok(())
-    }
-
-    fn print_vector<A>(vec: Vec<A>)
-    where
-        A: std::fmt::Debug,
-    {
-        println!("[");
-
-        for item in vec {
-            println!("    {:?},", item);
-        }
-
-        println!("]");
-    }
+fn type_check(ast: &Program) -> Result<TypeEnv, String> {
+    // Implement type checker
+    unimplemented!("Type checker not yet implemented")
 }
